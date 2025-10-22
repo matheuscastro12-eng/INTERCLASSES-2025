@@ -32,7 +32,6 @@ export function UltimosJogos() {
     "Vôlei",
     "Handebol",
     "Basquete",
-    "Queimada",
     "Futebol de Campo",
   ];
 

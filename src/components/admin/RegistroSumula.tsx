@@ -20,7 +20,6 @@ const modalidades = [
   "Handebol Feminino",
   "Basquete Masculino",
   "Basquete Feminino",
-  "Queimada Misto",
   "Futebol de Campo Masculino",
 ];
 
