@@ -59,6 +59,7 @@ export function GestaoProvaAlimentos() {
       turma_id: turma.id,
       nome_turma: turma.nome_turma,
       kg_alimentos: turma.pontuacao?.[0]?.kg_alimentos || 0,
+      cestas_basicas_entregues: turma.pontuacao?.[0]?.cestas_basicas_entregues || 0,
     });
     setDialogOpen(true);
   };
@@ -69,12 +70,15 @@ export function GestaoProvaAlimentos() {
     try {
       const { error } = await supabase
         .from("pontuacao_geral")
-        .update({ kg_alimentos: parseFloat(editando.kg_alimentos) || 0 })
+        .update({ 
+          kg_alimentos: parseFloat(editando.kg_alimentos) || 0,
+          cestas_basicas_entregues: parseInt(editando.cestas_basicas_entregues) || 0,
+        })
         .eq("turma_id", editando.turma_id);
 
       if (error) throw error;
 
-      toast.success("KG de alimentos atualizado!");
+      toast.success("Dados atualizados!");
       setDialogOpen(false);
       setEditando(null);
       fetchTurmas();
@@ -214,7 +218,7 @@ export function GestaoProvaAlimentos() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Editar KG de Alimentos - Turma {editando?.nome_turma}</DialogTitle>
+            <DialogTitle>Editar Prova do Alimento - Turma {editando?.nome_turma}</DialogTitle>
           </DialogHeader>
           {editando && (
             <div className="space-y-4">
@@ -226,6 +230,17 @@ export function GestaoProvaAlimentos() {
                   value={editando.kg_alimentos}
                   onChange={(e) =>
                     setEditando({ ...editando, kg_alimentos: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label>Cestas Básicas Entregues</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={editando.cestas_basicas_entregues}
+                  onChange={(e) =>
+                    setEditando({ ...editando, cestas_basicas_entregues: e.target.value })
                   }
                 />
               </div>

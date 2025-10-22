@@ -20,6 +20,13 @@ const modalidades = [
   "Basquete Feminino",
   "Queimada Misto",
   "Futebol de Campo Masculino",
+  "Xadrez",
+  "Pebolim Masculino",
+  "Pebolim Feminino",
+  "Sinuca Masculino",
+  "Sinuca Feminino",
+  "Peteca Masculino",
+  "Peteca Feminino",
 ];
 
 export function GestaoAtletas() {
@@ -130,21 +137,27 @@ export function GestaoAtletas() {
           <div>
             <Label>Modalidades Inscritas (opcional)</Label>
             <div className="grid grid-cols-2 gap-2 mt-2 max-h-40 overflow-y-auto p-2 border border-primary/30 rounded-md">
-              {modalidades.map((mod) => (
-                <div key={mod} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`mod-${mod}`}
-                    checked={modalidadesSelecionadas.includes(mod)}
-                    onCheckedChange={() => toggleModalidade(mod)}
-                  />
-                  <label
-                    htmlFor={`mod-${mod}`}
-                    className="text-xs cursor-pointer"
-                  >
-                    {mod}
-                  </label>
-                </div>
-              ))}
+              {modalidades
+                .filter(mod => {
+                  if (!genero) return true;
+                  if (mod.includes("Misto") || mod === "Xadrez") return true;
+                  return mod.includes(genero);
+                })
+                .map((mod) => (
+                  <div key={mod} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`mod-${mod}`}
+                      checked={modalidadesSelecionadas.includes(mod)}
+                      onCheckedChange={() => toggleModalidade(mod)}
+                    />
+                    <label
+                      htmlFor={`mod-${mod}`}
+                      className="text-xs cursor-pointer"
+                    >
+                      {mod}
+                    </label>
+                  </div>
+                ))}
             </div>
           </div>
           <Button onClick={handleAdd} className="w-full bg-primary">
