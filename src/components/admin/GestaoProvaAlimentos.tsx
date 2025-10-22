@@ -4,8 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShoppingBasket, Award } from "lucide-react";
+import { ShoppingBasket, Award, Edit } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const pontosAlimentos = [
   { posicao: 1, pontos: 10 },
@@ -19,6 +25,8 @@ const pontosAlimentos = [
 export function GestaoProvaAlimentos() {
   const [turmas, setTurmas] = useState<any[]>([]);
   const [ranking, setRanking] = useState<any[]>([]);
+  const [editando, setEditando] = useState<any>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchTurmas();
@@ -43,6 +51,36 @@ export function GestaoProvaAlimentos() {
     } else {
       toast.success("Cestas atualizadas!");
       fetchTurmas();
+    }
+  };
+
+  const handleEditKg = (turma: any) => {
+    setEditando({
+      turma_id: turma.id,
+      nome_turma: turma.nome_turma,
+      kg_alimentos: turma.pontuacao?.[0]?.kg_alimentos || 0,
+    });
+    setDialogOpen(true);
+  };
+
+  const handleSaveKg = async () => {
+    if (!editando) return;
+
+    try {
+      const { error } = await supabase
+        .from("pontuacao_geral")
+        .update({ kg_alimentos: parseFloat(editando.kg_alimentos) || 0 })
+        .eq("turma_id", editando.turma_id);
+
+      if (error) throw error;
+
+      toast.success("KG de alimentos atualizado!");
+      setDialogOpen(false);
+      setEditando(null);
+      fetchTurmas();
+    } catch (error) {
+      console.error("Erro ao atualizar:", error);
+      toast.error("Erro ao atualizar");
     }
   };
 
@@ -135,9 +173,16 @@ export function GestaoProvaAlimentos() {
                     </span>
                   )}
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-muted-foreground flex items-center gap-2">
                   {turma.pontuacao?.[0]?.kg_alimentos || 0} kg ·{" "}
                   {turma.pontuacao?.[0]?.pontos_alimentos || 0} pts
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => handleEditKg(turma)}
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
                 </div>
               </div>
             ))}
@@ -165,6 +210,32 @@ export function GestaoProvaAlimentos() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar KG de Alimentos - Turma {editando?.nome_turma}</DialogTitle>
+          </DialogHeader>
+          {editando && (
+            <div className="space-y-4">
+              <div>
+                <Label>KG de Alimentos</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={editando.kg_alimentos}
+                  onChange={(e) =>
+                    setEditando({ ...editando, kg_alimentos: e.target.value })
+                  }
+                />
+              </div>
+              <Button onClick={handleSaveKg} className="w-full">
+                Salvar Alterações
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

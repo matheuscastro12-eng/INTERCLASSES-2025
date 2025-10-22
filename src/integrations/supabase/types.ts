@@ -14,16 +14,341 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      atletas: {
+        Row: {
+          created_at: string
+          genero: Database["public"]["Enums"]["genero_tipo"]
+          id: string
+          modalidades_inscritas: string[] | null
+          nome_completo: string
+          prioridade_esporte: string | null
+          turma_id: string
+        }
+        Insert: {
+          created_at?: string
+          genero: Database["public"]["Enums"]["genero_tipo"]
+          id?: string
+          modalidades_inscritas?: string[] | null
+          nome_completo: string
+          prioridade_esporte?: string | null
+          turma_id: string
+        }
+        Update: {
+          created_at?: string
+          genero?: Database["public"]["Enums"]["genero_tipo"]
+          id?: string
+          modalidades_inscritas?: string[] | null
+          nome_completo?: string
+          prioridade_esporte?: string | null
+          turma_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "atletas_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partidas: {
+        Row: {
+          created_at: string
+          data_hora: string
+          detalhes_sumula: string | null
+          fase: string
+          genero_modalidade: Database["public"]["Enums"]["genero_tipo"]
+          id: string
+          modalidade: string
+          placar_a: number | null
+          placar_b: number | null
+          status: Database["public"]["Enums"]["status_modalidade"] | null
+          turma_a_id: string
+          turma_b_id: string
+          turma_wo_id: string | null
+          vencedor_id: string | null
+          wo_aplicado: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          data_hora: string
+          detalhes_sumula?: string | null
+          fase: string
+          genero_modalidade: Database["public"]["Enums"]["genero_tipo"]
+          id?: string
+          modalidade: string
+          placar_a?: number | null
+          placar_b?: number | null
+          status?: Database["public"]["Enums"]["status_modalidade"] | null
+          turma_a_id: string
+          turma_b_id: string
+          turma_wo_id?: string | null
+          vencedor_id?: string | null
+          wo_aplicado?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          data_hora?: string
+          detalhes_sumula?: string | null
+          fase?: string
+          genero_modalidade?: Database["public"]["Enums"]["genero_tipo"]
+          id?: string
+          modalidade?: string
+          placar_a?: number | null
+          placar_b?: number | null
+          status?: Database["public"]["Enums"]["status_modalidade"] | null
+          turma_a_id?: string
+          turma_b_id?: string
+          turma_wo_id?: string | null
+          vencedor_id?: string | null
+          wo_aplicado?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partidas_turma_a_id_fkey"
+            columns: ["turma_a_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partidas_turma_b_id_fkey"
+            columns: ["turma_b_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partidas_turma_wo_id_fkey"
+            columns: ["turma_wo_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partidas_vencedor_id_fkey"
+            columns: ["vencedor_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      penalidades_log: {
+        Row: {
+          aplicado_por: string | null
+          artigo_regulamento: string
+          data_aplicacao: string
+          id: string
+          motivo: string
+          tipo_penalidade: string
+          turma_id: string
+          valor_multa: number | null
+          valor_pontos: number | null
+        }
+        Insert: {
+          aplicado_por?: string | null
+          artigo_regulamento: string
+          data_aplicacao?: string
+          id?: string
+          motivo: string
+          tipo_penalidade: string
+          turma_id: string
+          valor_multa?: number | null
+          valor_pontos?: number | null
+        }
+        Update: {
+          aplicado_por?: string | null
+          artigo_regulamento?: string
+          data_aplicacao?: string
+          id?: string
+          motivo?: string
+          tipo_penalidade?: string
+          turma_id?: string
+          valor_multa?: number | null
+          valor_pontos?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "penalidades_log_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pontuacao_geral: {
+        Row: {
+          cestas_basicas_entregues: number | null
+          kg_alimentos: number | null
+          multa_cestas_faltantes: number | null
+          pen_disciplinar: number | null
+          pen_nao_calouro: number | null
+          pen_nao_plantao: number | null
+          pen_wo_esportivo: number | null
+          percentual_doadores_sangue: number | null
+          pontos_alimentos: number | null
+          pontos_esportivos: number | null
+          pontos_sangue: number | null
+          total_pontos: number | null
+          turma_id: string
+          updated_at: string
+        }
+        Insert: {
+          cestas_basicas_entregues?: number | null
+          kg_alimentos?: number | null
+          multa_cestas_faltantes?: number | null
+          pen_disciplinar?: number | null
+          pen_nao_calouro?: number | null
+          pen_nao_plantao?: number | null
+          pen_wo_esportivo?: number | null
+          percentual_doadores_sangue?: number | null
+          pontos_alimentos?: number | null
+          pontos_esportivos?: number | null
+          pontos_sangue?: number | null
+          total_pontos?: number | null
+          turma_id: string
+          updated_at?: string
+        }
+        Update: {
+          cestas_basicas_entregues?: number | null
+          kg_alimentos?: number | null
+          multa_cestas_faltantes?: number | null
+          pen_disciplinar?: number | null
+          pen_nao_calouro?: number | null
+          pen_nao_plantao?: number | null
+          pen_wo_esportivo?: number | null
+          percentual_doadores_sangue?: number | null
+          pontos_alimentos?: number | null
+          pontos_esportivos?: number | null
+          pontos_sangue?: number | null
+          total_pontos?: number | null
+          turma_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pontuacao_geral_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: true
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pontuacao_solidaria_logs: {
+        Row: {
+          data_alteracao: string
+          id: string
+          motivo_alteracao: string
+          turma_id: string
+          usuario_admin_id: string | null
+          valor_anterior: Json | null
+          valor_novo: Json
+        }
+        Insert: {
+          data_alteracao?: string
+          id?: string
+          motivo_alteracao: string
+          turma_id: string
+          usuario_admin_id?: string | null
+          valor_anterior?: Json | null
+          valor_novo: Json
+        }
+        Update: {
+          data_alteracao?: string
+          id?: string
+          motivo_alteracao?: string
+          turma_id?: string
+          usuario_admin_id?: string | null
+          valor_anterior?: Json | null
+          valor_novo?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pontuacao_solidaria_logs_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          is_admin: boolean | null
+          username: string | null
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          is_admin?: boolean | null
+          username?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_admin?: boolean | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      turmas: {
+        Row: {
+          calouro: boolean
+          created_at: string
+          graduacao: number
+          id: string
+          internato: boolean
+          nome_turma: string
+          sexto_ano: boolean
+        }
+        Insert: {
+          calouro?: boolean
+          created_at?: string
+          graduacao: number
+          id?: string
+          internato?: boolean
+          nome_turma: string
+          sexto_ano?: boolean
+        }
+        Update: {
+          calouro?: boolean
+          created_at?: string
+          graduacao?: number
+          id?: string
+          internato?: boolean
+          nome_turma?: string
+          sexto_ano?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      aplicar_wo: {
+        Args: { partida_uuid: string; turma_uuid: string }
+        Returns: undefined
+      }
+      calculate_total_pontos: { Args: { turma_uuid: string }; Returns: number }
+      calculate_total_pontos_v2: {
+        Args: { turma_uuid: string }
+        Returns: number
+      }
     }
     Enums: {
-      [_ in never]: never
+      genero_tipo: "Masculino" | "Feminino" | "Outro"
+      status_modalidade:
+        | "agendada"
+        | "em_andamento"
+        | "finalizada"
+        | "cancelada"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +475,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      genero_tipo: ["Masculino", "Feminino", "Outro"],
+      status_modalidade: [
+        "agendada",
+        "em_andamento",
+        "finalizada",
+        "cancelada",
+      ],
+    },
   },
 } as const

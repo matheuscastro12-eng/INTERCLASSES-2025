@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, Droplet } from "lucide-react";
 import { toast } from "sonner";
+import { ListaSolidaria } from "./ListaSolidaria";
 
 export function ProvaSolidaria() {
   const { profile } = useAuth();
@@ -65,6 +66,8 @@ export function ProvaSolidaria() {
 
   return (
     <div className="space-y-6">
+      <ListaSolidaria />
+      
       <Card className="border-primary/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

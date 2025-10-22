@@ -7,6 +7,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
+
+const modalidades = [
+  "Futsal Masculino",
+  "Futsal Feminino",
+  "Vôlei Masculino",
+  "Vôlei Feminino",
+  "Handebol Masculino",
+  "Handebol Feminino",
+  "Basquete Masculino",
+  "Basquete Feminino",
+  "Queimada Misto",
+  "Futebol de Campo Masculino",
+];
 
 export function GestaoAtletas() {
   const [turmas, setTurmas] = useState<any[]>([]);
@@ -14,6 +28,7 @@ export function GestaoAtletas() {
   const [nome, setNome] = useState("");
   const [turmaId, setTurmaId] = useState("");
   const [genero, setGenero] = useState("");
+  const [modalidadesSelecionadas, setModalidadesSelecionadas] = useState<string[]>([]);
 
   useEffect(() => {
     fetchTurmas();
@@ -34,12 +49,16 @@ export function GestaoAtletas() {
   };
 
   const handleAdd = async () => {
-    if (!nome || !turmaId || !genero) return;
+    if (!nome || !turmaId || !genero) {
+      toast.error("Preencha todos os campos obrigatórios");
+      return;
+    }
     
     const { error } = await supabase.from("atletas").insert([{
       nome_completo: nome,
       turma_id: turmaId,
       genero: genero as "Masculino" | "Feminino",
+      modalidades_inscritas: modalidadesSelecionadas,
     }]);
 
     if (error) {
@@ -49,8 +68,17 @@ export function GestaoAtletas() {
       setNome("");
       setTurmaId("");
       setGenero("");
+      setModalidadesSelecionadas([]);
       fetchAtletas();
     }
+  };
+
+  const toggleModalidade = (modalidade: string) => {
+    setModalidadesSelecionadas(prev => 
+      prev.includes(modalidade) 
+        ? prev.filter(m => m !== modalidade)
+        : [...prev, modalidade]
+    );
   };
 
   const handleDelete = async (id: string) => {
@@ -99,6 +127,26 @@ export function GestaoAtletas() {
               </SelectContent>
             </Select>
           </div>
+          <div>
+            <Label>Modalidades Inscritas (opcional)</Label>
+            <div className="grid grid-cols-2 gap-2 mt-2 max-h-40 overflow-y-auto p-2 border border-primary/30 rounded-md">
+              {modalidades.map((mod) => (
+                <div key={mod} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`mod-${mod}`}
+                    checked={modalidadesSelecionadas.includes(mod)}
+                    onCheckedChange={() => toggleModalidade(mod)}
+                  />
+                  <label
+                    htmlFor={`mod-${mod}`}
+                    className="text-xs cursor-pointer"
+                  >
+                    {mod}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
           <Button onClick={handleAdd} className="w-full bg-primary">
             <Plus className="mr-2 h-4 w-4" /> Adicionar
           </Button>
@@ -113,11 +161,16 @@ export function GestaoAtletas() {
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {atletas.map((a) => (
               <div key={a.id} className="flex justify-between items-center p-3 bg-muted/30 rounded">
-                <div>
+                <div className="flex-1">
                   <span className="font-medium">{a.nome_completo}</span>
                   <span className="text-sm text-muted-foreground ml-2">
                     Turma {a.turma.nome_turma} · {a.genero}
                   </span>
+                  {a.modalidades_inscritas && a.modalidades_inscritas.length > 0 && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Modalidades: {a.modalidades_inscritas.join(", ")}
+                    </div>
+                  )}
                 </div>
                 <Button variant="destructive" size="sm" onClick={() => handleDelete(a.id)}>
                   <Trash2 className="h-4 w-4" />

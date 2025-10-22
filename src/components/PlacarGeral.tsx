@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trophy, TrendingUp } from "lucide-react";
+import { Trophy, TrendingUp, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface PontuacaoTurma {
   turma_id: string;
@@ -25,6 +31,9 @@ interface PontuacaoTurma {
 export function PlacarGeral() {
   const [ranking, setRanking] = useState<PontuacaoTurma[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [atletasSelecionados, setAtletasSelecionados] = useState<any[]>([]);
+  const [turmaSelecionada, setTurmaSelecionada] = useState("");
 
   useEffect(() => {
     fetchRanking();
@@ -70,6 +79,17 @@ export function PlacarGeral() {
     }
   };
 
+  const handleVerAtletas = async (turmaId: string, nomeTurma: string) => {
+    setTurmaSelecionada(nomeTurma);
+    const { data } = await supabase
+      .from("atletas")
+      .select("*")
+      .eq("turma_id", turmaId)
+      .order("nome_completo");
+    setAtletasSelecionados(data || []);
+    setDialogOpen(true);
+  };
+
   if (loading) {
     return (
       <Card className="border-primary/30 shadow-tactical">
@@ -97,9 +117,10 @@ export function PlacarGeral() {
           {ranking.map((item, index) => (
             <div
               key={item.turma_id}
-              className={`p-4 hover:bg-muted/30 transition-colors ${
+              className={`p-4 hover:bg-muted/30 transition-colors cursor-pointer ${
                 index < 3 ? "bg-muted/10" : ""
               }`}
+              onClick={() => handleVerAtletas(item.turma_id, item.turma.nome_turma)}
             >
               <div className="flex items-center gap-4">
                 {/* Posição */}
@@ -129,6 +150,7 @@ export function PlacarGeral() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="text-xl font-bold">Turma {item.turma.nome_turma}</h3>
+                    <Users className="w-4 h-4 text-muted-foreground" />
                     {item.turma.internato && (
                       <Badge variant="outline" className="text-xs border-primary/40">
                         Internato
@@ -180,6 +202,38 @@ export function PlacarGeral() {
           ))}
         </div>
       </CardContent>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Atletas da Turma {turmaSelecionada}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {atletasSelecionados.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">
+                Nenhum atleta registrado nesta turma
+              </p>
+            ) : (
+              atletasSelecionados.map((atleta) => (
+                <div key={atleta.id} className="p-3 bg-muted/30 rounded-lg">
+                  <div className="font-medium">{atleta.nome_completo}</div>
+                  <div className="text-sm text-muted-foreground mt-1">
+                    {atleta.genero}
+                  </div>
+                  {atleta.modalidades_inscritas && atleta.modalidades_inscritas.length > 0 && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Modalidades: {atleta.modalidades_inscritas.join(", ")}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

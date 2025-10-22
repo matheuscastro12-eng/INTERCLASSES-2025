@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, Save, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ListaPartidas } from "./ListaPartidas";
 
 const modalidades = [
   "Futsal Masculino",
@@ -168,6 +169,8 @@ export function RegistroSumula() {
 
   return (
     <div className="space-y-6">
+      <ListaPartidas />
+      
       <Card className="border-primary/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
