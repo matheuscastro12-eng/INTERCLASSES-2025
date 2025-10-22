@@ -27,6 +27,7 @@ export function GestaoProvaAlimentos() {
   const [ranking, setRanking] = useState<any[]>([]);
   const [editando, setEditando] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [cestasInputs, setCestasInputs] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetchTurmas();
@@ -38,6 +39,15 @@ export function GestaoProvaAlimentos() {
       .select("id, nome_turma, pontuacao:pontuacao_geral(*)")
       .order("graduacao");
     setTurmas(data || []);
+    
+    // Initialize cestasInputs with current values
+    if (data) {
+      const inputs: Record<string, number> = {};
+      data.forEach((turma) => {
+        inputs[turma.id] = turma.pontuacao?.[0]?.cestas_basicas_entregues || 0;
+      });
+      setCestasInputs(inputs);
+    }
   };
 
   const handleUpdateCestas = async (turmaId: string, cestas: number) => {
@@ -164,8 +174,11 @@ export function GestaoProvaAlimentos() {
                   <Input
                     type="number"
                     min="0"
-                    defaultValue={turma.pontuacao?.[0]?.cestas_basicas_entregues || 0}
+                    value={cestasInputs[turma.id] ?? 0}
                     className="w-20 h-8"
+                    onChange={(e) =>
+                      setCestasInputs({ ...cestasInputs, [turma.id]: parseInt(e.target.value) || 0 })
+                    }
                     onBlur={(e) =>
                       handleUpdateCestas(turma.id, parseInt(e.target.value) || 0)
                     }
