@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { penalidadeSchema } from "@/lib/validations";
 
 export function GestaoPenalidades() {
   const { profile } = useAuth();
@@ -48,15 +49,26 @@ export function GestaoPenalidades() {
   };
 
   const handleAplicarPenalidade = async () => {
-    if (!tipoPenalidade || !turmaId || !artigo || !motivo) {
-      toast.error("Preencha todos os campos obrigatórios");
-      return;
-    }
-
     const penalidade = penalidades.find((p) => p.value === tipoPenalidade);
     if (!penalidade) return;
 
     try {
+      // Validate input
+      const validation = penalidadeSchema.safeParse({
+        turma_id: turmaId,
+        tipo_penalidade: tipoPenalidade,
+        valor_pontos: tipoPenalidade !== "nao_calouro" ? parseInt(valorPontos) || undefined : undefined,
+        valor_multa: tipoPenalidade === "nao_calouro" ? parseFloat(valorMulta) || undefined : undefined,
+        artigo_regulamento: artigo,
+        motivo: motivo,
+      });
+
+      if (!validation.success) {
+        const firstError = validation.error.errors[0];
+        toast.error(firstError.message);
+        return;
+      }
+
       // Buscar pontuação atual
       const { data: pontuacaoAtual } = await supabase
         .from("pontuacao_geral")
@@ -215,7 +227,11 @@ export function GestaoPenalidades() {
               onChange={(e) => setMotivo(e.target.value)}
               placeholder="Descreva o motivo da penalidade..."
               className="border-primary/30"
+              maxLength={500}
             />
+            <p className="text-xs text-muted-foreground">
+              {motivo.length}/500 caracteres
+            </p>
           </div>
 
           <Button

@@ -1,17 +1,18 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Droplet } from "lucide-react";
 import { toast } from "sonner";
+import { Save, Heart } from "lucide-react";
 import { ListaSolidaria } from "./ListaSolidaria";
+import { Badge } from "@/components/ui/badge";
+import { Droplet } from "lucide-react";
+import { provaSolidariaSchema } from "@/lib/validations";
 
 export function ProvaSolidaria() {
-  const { profile } = useAuth();
   const [turmas, setTurmas] = useState<any[]>([]);
   const [turmaId, setTurmaId] = useState("");
   const [kgAlimentos, setKgAlimentos] = useState("");
@@ -30,26 +31,34 @@ export function ProvaSolidaria() {
   };
 
   const handleSalvar = async () => {
-    if (!turmaId) {
-      toast.error("Selecione uma turma");
-      return;
-    }
-
     try {
+      // Validate input
+      const validation = provaSolidariaSchema.safeParse({
+        turma_id: turmaId,
+        kg_alimentos: parseFloat(kgAlimentos) || 0,
+        percentual_doadores_sangue: parseFloat(percentualDoadores) || 0,
+      });
+
+      if (!validation.success) {
+        const firstError = validation.error.errors[0];
+        toast.error(firstError.message);
+        return;
+      }
+
       const updateData: any = {};
       
       if (kgAlimentos) {
-        updateData.kg_alimentos = parseFloat(kgAlimentos);
+        updateData.kg_alimentos = validation.data.kg_alimentos;
       }
       
       if (percentualDoadores) {
-        updateData.percentual_doadores_sangue = parseFloat(percentualDoadores);
+        updateData.percentual_doadores_sangue = validation.data.percentual_doadores_sangue;
       }
 
       const { error } = await supabase
         .from("pontuacao_geral")
         .update(updateData)
-        .eq("turma_id", turmaId);
+        .eq("turma_id", validation.data.turma_id);
 
       if (error) throw error;
 

@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { UserPlus, Trash2, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { atletaSchema } from "@/lib/validations";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const modalidades = [
@@ -55,27 +57,42 @@ export function GestaoAtletas() {
   };
 
   const handleAdd = async () => {
-    if (!nome || !turmaId || !genero) {
-      toast.error("Preencha todos os campos obrigatórios");
-      return;
-    }
-    
-    const { error } = await supabase.from("atletas").insert([{
-      nome_completo: nome,
-      turma_id: turmaId,
-      genero: genero as "Masculino" | "Feminino",
-      modalidades_inscritas: modalidadesSelecionadas,
-    }]);
+    try {
+      // Validate input
+      const validation = atletaSchema.safeParse({
+        nome_completo: nome,
+        turma_id: turmaId,
+        genero,
+        modalidades_inscritas: modalidadesSelecionadas.length > 0 ? modalidadesSelecionadas : ["Nenhuma"],
+        prioridade_esporte: modalidadesSelecionadas[0],
+      });
 
-    if (error) {
+      if (!validation.success) {
+        const firstError = validation.error.errors[0];
+        toast.error(firstError.message);
+        return;
+      }
+    
+      const { error } = await supabase.from("atletas").insert([{
+        nome_completo: validation.data.nome_completo,
+        turma_id: validation.data.turma_id,
+        genero: validation.data.genero as "Masculino" | "Feminino",
+        modalidades_inscritas: validation.data.modalidades_inscritas,
+      }]);
+
+      if (error) {
+        toast.error("Erro ao adicionar atleta");
+      } else {
+        toast.success("Atleta adicionado!");
+        setNome("");
+        setTurmaId("");
+        setGenero("");
+        setModalidadesSelecionadas([]);
+        fetchAtletas();
+      }
+    } catch (error) {
+      console.error("Erro ao adicionar atleta:", error);
       toast.error("Erro ao adicionar atleta");
-    } else {
-      toast.success("Atleta adicionado!");
-      setNome("");
-      setTurmaId("");
-      setGenero("");
-      setModalidadesSelecionadas([]);
-      fetchAtletas();
     }
   };
 
@@ -160,7 +177,7 @@ export function GestaoAtletas() {
             </div>
           </div>
           <Button onClick={handleAdd} className="w-full bg-primary">
-            <Plus className="mr-2 h-4 w-4" /> Adicionar
+            <UserPlus className="mr-2 h-4 w-4" /> Adicionar
           </Button>
         </CardContent>
       </Card>

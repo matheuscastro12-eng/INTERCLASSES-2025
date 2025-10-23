@@ -49,16 +49,38 @@ export function useAuth() {
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
         .single();
 
-      if (error) throw error;
-      setProfile(data);
+      if (profileError) throw profileError;
+      
+      // Check if user has admin role in user_roles table
+      const { data: roleData, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .single();
+      
+      setProfile({
+        ...profileData,
+        is_admin: roleData?.role === "admin"
+      });
     } catch (error) {
       console.error("Error fetching profile:", error);
+      // If no admin role found, set is_admin to false
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+      
+      if (profileData) {
+        setProfile({ ...profileData, is_admin: false });
+      }
     } finally {
       setLoading(false);
     }

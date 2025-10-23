@@ -10,6 +10,7 @@ import { AlertCircle, Save, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ListaPartidas } from "./ListaPartidas";
+import { partidaSchema } from "@/lib/validations";
 
 const modalidades = [
   "Futsal Masculino",
@@ -55,26 +56,47 @@ export function RegistroSumula() {
   };
 
   const handleRegistrarResultado = async () => {
-    if (!modalidade || !fase || !turmaAId || !turmaBId || !dataHora) {
-      toast.error("Preencha todos os campos obrigatórios");
-      return;
-    }
-
     if (turmaAId === turmaBId) {
       toast.error("Selecione turmas diferentes");
       return;
     }
 
+    const pA = parseInt(placarA) || 0;
+    const pB = parseInt(placarB) || 0;
+
     try {
+      // Validate input
       const genero = modalidade.includes("Masculino")
+        ? "M"
+        : modalidade.includes("Feminino")
+        ? "F"
+        : "Misto" as "M" | "F" | "Misto";
+
+      const validation = partidaSchema.safeParse({
+        turma_a_id: turmaAId,
+        turma_b_id: turmaBId,
+        placar_a: pA,
+        placar_b: pB,
+        modalidade,
+        genero_modalidade: genero,
+        fase,
+        data_hora: dataHora,
+        detalhes_sumula: detalhes || undefined,
+      });
+
+      if (!validation.success) {
+        const firstError = validation.error.errors[0];
+        toast.error(firstError.message);
+        return;
+      }
+
+      const generoDb = modalidade.includes("Masculino")
         ? "Masculino"
         : modalidade.includes("Feminino")
         ? "Feminino"
         : "Outro" as "Masculino" | "Feminino" | "Outro";
 
       let vencedorId = null;
-      const pA = parseInt(placarA) || 0;
-      const pB = parseInt(placarB) || 0;
 
       if (!woMode) {
         vencedorId = pA > pB ? turmaAId : pB > pA ? turmaBId : null;
@@ -120,7 +142,7 @@ export function RegistroSumula() {
         .insert([
           {
             modalidade,
-            genero_modalidade: genero,
+            genero_modalidade: generoDb,
             fase,
             data_hora: dataHora,
             turma_a_id: turmaAId,
@@ -334,7 +356,11 @@ export function RegistroSumula() {
               onChange={(e) => setDetalhes(e.target.value)}
               placeholder="Observações, melhores jogadores, cartões, etc..."
               className="border-primary/30 min-h-[100px]"
+              maxLength={1000}
             />
+            <p className="text-xs text-muted-foreground">
+              {detalhes.length}/1000 caracteres
+            </p>
           </div>
 
           <Button onClick={handleRegistrarResultado} className="w-full bg-primary hover:bg-primary-glow shadow-glow">

@@ -4,14 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShoppingBasket, Award, Edit } from "lucide-react";
 import { toast } from "sonner";
+import { Trophy, Edit, Calculator, AlertCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { provaAlimentosSchema } from "@/lib/validations";
 
 const pontosAlimentos = [
   { posicao: 1, pontos: 10 },
@@ -76,13 +79,25 @@ export function GestaoProvaAlimentos() {
 
   const handleSaveKg = async () => {
     if (!editando) return;
-
+    
     try {
+      // Validate input
+      const validation = provaAlimentosSchema.safeParse({
+        kg_alimentos: parseFloat(editando.kg_alimentos),
+        cestas_basicas_entregues: parseInt(editando.cestas_basicas_entregues),
+      });
+
+      if (!validation.success) {
+        const firstError = validation.error.errors[0];
+        toast.error(firstError.message);
+        return;
+      }
+
       const { error } = await supabase
         .from("pontuacao_geral")
         .update({ 
-          kg_alimentos: parseFloat(editando.kg_alimentos) || 0,
-          cestas_basicas_entregues: parseInt(editando.cestas_basicas_entregues) || 0,
+          kg_alimentos: validation.data.kg_alimentos,
+          cestas_basicas_entregues: validation.data.cestas_basicas_entregues,
         })
         .eq("turma_id", editando.turma_id);
 
@@ -143,7 +158,7 @@ export function GestaoProvaAlimentos() {
       <Card className="border-primary/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ShoppingBasket className="w-5 h-5 text-primary" />
+            <Trophy className="w-5 h-5 text-primary" />
             Gestão Prova do Alimento
           </CardTitle>
         </CardHeader>
@@ -207,7 +222,7 @@ export function GestaoProvaAlimentos() {
             onClick={handleCalcularRanking}
             className="w-full bg-primary hover:bg-primary-glow"
           >
-            <Award className="mr-2 h-4 w-4" />
+            <Calculator className="mr-2 h-4 w-4" />
             Calcular Ranking Final
           </Button>
 
