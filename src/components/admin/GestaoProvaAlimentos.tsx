@@ -99,6 +99,11 @@ export function GestaoProvaAlimentos() {
   };
 
   const handleCalcularRanking = async () => {
+    // Zerar todos os pontos de alimentos primeiro
+    await supabase
+      .from("pontuacao_geral")
+      .update({ pontos_alimentos: 0 });
+
     // Buscar todas as turmas com seus kg de alimentos
     const { data } = await supabase
       .from("pontuacao_geral")
@@ -107,26 +112,19 @@ export function GestaoProvaAlimentos() {
 
     if (!data) return;
 
-    // Aplicar pontuação conforme posição
+    // Aplicar pontuação conforme posição para o top 6
     const updates = data.slice(0, 6).map((item, index) => ({
       turma_id: item.turma_id,
       pontos_alimentos: pontosAlimentos[index]?.pontos || 0,
     }));
 
-    // Atualizar pontos no banco
+    // Atualizar pontos no banco (trigger recalcula total_pontos automaticamente)
     for (const update of updates) {
       await supabase
         .from("pontuacao_geral")
         .update({ pontos_alimentos: update.pontos_alimentos })
         .eq("turma_id", update.turma_id);
     }
-
-    // Zerar pontos das turmas fora do top 6
-    const top6Ids = updates.map((u) => u.turma_id);
-    await supabase
-      .from("pontuacao_geral")
-      .update({ pontos_alimentos: 0 })
-      .not("turma_id", "in", `(${top6Ids.join(",")})`);
 
     toast.success("Ranking de alimentos calculado!");
     fetchTurmas();
@@ -235,6 +233,10 @@ export function GestaoProvaAlimentos() {
           </DialogHeader>
           {editando && (
             <div className="space-y-4">
+              <div className="p-3 bg-muted/30 rounded-lg text-sm">
+                <p><strong>Cestas atuais:</strong> {editando.cestas_basicas_entregues}</p>
+                <p><strong>KG atuais:</strong> {editando.kg_alimentos}</p>
+              </div>
               <div>
                 <Label>KG de Alimentos</Label>
                 <Input
