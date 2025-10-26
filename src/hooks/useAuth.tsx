@@ -50,7 +50,7 @@ export function useAuth() {
   const fetchUserProfile = async (userId: string) => {
     try {
       console.log('🔍 Buscando perfil para:', userId);
-      
+
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
@@ -61,33 +61,51 @@ export function useAuth() {
         console.error("❌ Erro ao buscar perfil:", profileError);
         throw profileError;
       }
-      
+
       console.log('✅ Perfil encontrado:', profileData);
-      
-      // Check if user has admin role in user_roles table
-      const { data: roleData, error: roleError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId);
-      
-      console.log('🔐 Roles encontradas:', roleData);
-      
-      const isAdmin = roleData?.some(r => r.role === "admin") ?? false;
+
+      // Preferir função RPC has_role (SECURITY DEFINER) para evitar problemas de RLS
+      const { data: hasAdminRole, error: rpcError } = await supabase.rpc('has_role', {
+        _user_id: userId,
+        _role: 'admin'
+      });
+
+      if (rpcError) {
+        console.warn('⚠️ Falha ao usar has_role RPC, tentando fallback:', rpcError);
+      }
+
+      let isAdmin = hasAdminRole === true;
+
+      // Fallback: consulta direta à tabela user_roles caso RPC falhe
+      if (!isAdmin && rpcError) {
+        const { data: rolesData, error: rolesError } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId);
+
+        if (rolesError) {
+          console.error('❌ Erro ao buscar roles:', rolesError);
+        } else {
+          console.log('🔐 Roles encontradas (fallback):', rolesData);
+          isAdmin = rolesData?.some((r: any) => r.role === 'admin') ?? false;
+        }
+      }
+
       console.log('👤 É admin?', isAdmin);
-      
+
       setProfile({
         ...profileData,
-        is_admin: isAdmin
+        is_admin: isAdmin,
       });
     } catch (error) {
       console.error("❌ Erro ao buscar dados do usuário:", error);
-      // If no admin role found, set is_admin to false
+      // Se falhar, ainda preenche o perfil para não quebrar a UI
       const { data: profileData } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
         .single();
-      
+
       if (profileData) {
         console.log('⚠️ Perfil encontrado mas sem role admin');
         setProfile({ ...profileData, is_admin: false });
