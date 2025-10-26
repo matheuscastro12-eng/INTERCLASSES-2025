@@ -49,28 +49,38 @@ export function useAuth() {
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('🔍 Buscando perfil para:', userId);
+      
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
         .single();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("❌ Erro ao buscar perfil:", profileError);
+        throw profileError;
+      }
+      
+      console.log('✅ Perfil encontrado:', profileData);
       
       // Check if user has admin role in user_roles table
       const { data: roleData, error: roleError } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", userId)
-        .eq("role", "admin")
-        .single();
+        .eq("user_id", userId);
+      
+      console.log('🔐 Roles encontradas:', roleData);
+      
+      const isAdmin = roleData?.some(r => r.role === "admin") ?? false;
+      console.log('👤 É admin?', isAdmin);
       
       setProfile({
         ...profileData,
-        is_admin: roleData?.role === "admin"
+        is_admin: isAdmin
       });
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      console.error("❌ Erro ao buscar dados do usuário:", error);
       // If no admin role found, set is_admin to false
       const { data: profileData } = await supabase
         .from("profiles")
@@ -79,6 +89,7 @@ export function useAuth() {
         .single();
       
       if (profileData) {
+        console.log('⚠️ Perfil encontrado mas sem role admin');
         setProfile({ ...profileData, is_admin: false });
       }
     } finally {
