@@ -22,6 +22,9 @@ const modalidades = [
   "Basquete Masculino",
   "Basquete Feminino",
   "Futebol de Campo Masculino",
+  "Pebolim",
+  "Sinuca",
+  "Xadrez",
 ];
 
 const fases = [
@@ -80,7 +83,7 @@ export function RegistroSumula() {
         modalidade,
         genero_modalidade: genero,
         fase,
-        data_hora: dataHora,
+        data_hora: dataHora || undefined,
         detalhes_sumula: detalhes || undefined,
       });
 
@@ -144,7 +147,7 @@ export function RegistroSumula() {
             modalidade,
             genero_modalidade: generoDb,
             fase,
-            data_hora: dataHora,
+            data_hora: dataHora || null,
             turma_a_id: turmaAId,
             turma_b_id: turmaBId,
             placar_a: woMode ? 0 : pA,
@@ -234,7 +237,7 @@ export function RegistroSumula() {
             </div>
 
             <div>
-              <Label>Data e Hora *</Label>
+              <Label>Data e Hora (opcional)</Label>
               <Input
                 type="datetime-local"
                 value={dataHora}

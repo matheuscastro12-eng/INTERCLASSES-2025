@@ -35,7 +35,7 @@ export const partidaSchema = z.object({
     errorMap: () => ({ message: "Selecione um gênero válido" }) 
   }),
   fase: z.string().min(1, "Selecione uma fase"),
-  data_hora: z.string().min(1, "Selecione uma data"),
+  data_hora: z.string().optional(),
   detalhes_sumula: z
     .string()
     .max(1000, "Detalhes da súmula devem ter no máximo 1000 caracteres")

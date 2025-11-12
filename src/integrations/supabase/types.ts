@@ -55,7 +55,7 @@ export type Database = {
       partidas: {
         Row: {
           created_at: string
-          data_hora: string
+          data_hora: string | null
           detalhes_sumula: string | null
           fase: string
           genero_modalidade: Database["public"]["Enums"]["genero_tipo"]
@@ -72,7 +72,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          data_hora: string
+          data_hora?: string | null
           detalhes_sumula?: string | null
           fase: string
           genero_modalidade: Database["public"]["Enums"]["genero_tipo"]
@@ -89,7 +89,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          data_hora?: string
+          data_hora?: string | null
           detalhes_sumula?: string | null
           fase?: string
           genero_modalidade?: Database["public"]["Enums"]["genero_tipo"]
