@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, LogOut, Users, Trophy, FileText, Heart, ShoppingBasket, AlertTriangle, Trash2 } from "lucide-react";
+import { Shield, LogOut, Users, Trophy, FileText, Heart, ShoppingBasket, AlertTriangle, Trash2, Workflow } from "lucide-react";
 import { toast } from "sonner";
 import { GestaoAtletas } from "@/components/admin/GestaoAtletas";
 import { RegistroSumula } from "@/components/admin/RegistroSumula";
@@ -11,6 +11,7 @@ import { ProvaSolidaria } from "@/components/admin/ProvaSolidaria";
 import { GestaoProvaAlimentos } from "@/components/admin/GestaoProvaAlimentos";
 import { GestaoPenalidades } from "@/components/admin/GestaoPenalidades";
 import { ResetarTudo } from "@/components/admin/ResetarTudo";
+import { GestaoChaves } from "@/components/admin/GestaoChaves";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -83,7 +84,7 @@ const Admin = () => {
       {/* Conteúdo Principal */}
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="atletas" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-card border border-primary/30">
+          <TabsList className="grid w-full grid-cols-7 bg-card border border-primary/30">
             <TabsTrigger value="atletas" className="data-[state=active]:bg-primary">
               <Users className="mr-2 h-4 w-4" />
               Atletas
@@ -103,6 +104,10 @@ const Admin = () => {
             <TabsTrigger value="penalidades" className="data-[state=active]:bg-primary">
               <AlertTriangle className="mr-2 h-4 w-4" />
               Penalidades
+            </TabsTrigger>
+            <TabsTrigger value="chaves" className="data-[state=active]:bg-primary">
+              <Workflow className="mr-2 h-4 w-4" />
+              Chaves
             </TabsTrigger>
             <TabsTrigger value="resetar" className="data-[state=active]:bg-destructive">
               <Trash2 className="mr-2 h-4 w-4" />
@@ -128,6 +133,10 @@ const Admin = () => {
 
           <TabsContent value="penalidades" className="space-y-4">
             <GestaoPenalidades />
+          </TabsContent>
+
+          <TabsContent value="chaves" className="space-y-4">
+            <GestaoChaves />
           </TabsContent>
 
           <TabsContent value="resetar" className="space-y-4">
