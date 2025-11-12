@@ -52,6 +52,42 @@ export type Database = {
           },
         ]
       }
+      chaves_torneio: {
+        Row: {
+          created_at: string
+          estrutura_chave: Json
+          formato: string
+          genero_modalidade: Database["public"]["Enums"]["genero_tipo"]
+          id: string
+          modalidade: string
+          numero_times: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estrutura_chave?: Json
+          formato: string
+          genero_modalidade: Database["public"]["Enums"]["genero_tipo"]
+          id?: string
+          modalidade: string
+          numero_times: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estrutura_chave?: Json
+          formato?: string
+          genero_modalidade?: Database["public"]["Enums"]["genero_tipo"]
+          id?: string
+          modalidade?: string
+          numero_times?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       partidas: {
         Row: {
           created_at: string
