@@ -67,6 +67,10 @@ const Auth = () => {
               <Label htmlFor="username">Usuário</Label>
               <Input
                 id="username"
+                name="username"
+                autoComplete="username"
+                autoCapitalize="none"
+                spellCheck={false}
                 placeholder="Digite seu usuário"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -79,7 +83,9 @@ const Auth = () => {
               <Label htmlFor="password">Senha</Label>
               <Input
                 id="password"
+                name="password"
                 type="password"
+                autoComplete={isLogin ? "current-password" : "new-password"}
                 placeholder="Digite sua senha"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
